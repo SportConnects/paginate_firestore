@@ -57,7 +57,7 @@ class PaginateFirestore extends StatefulWidget {
   final List<ChangeNotifier>? listeners;
   final EdgeInsets padding;
   final ScrollPhysics? physics;
-  final double? cacheExtent,
+  final double? cacheExtent;
   final Query query;
   final bool reverse;
   final bool allowImplicitScrolling;
