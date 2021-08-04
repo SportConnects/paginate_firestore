@@ -37,6 +37,7 @@ class PaginateFirestore extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding = const EdgeInsets.all(0),
     this.physics,
+	this.cacheExtent,
     this.listeners,
     this.scrollController,
     this.allowImplicitScrolling = false,
@@ -56,6 +57,7 @@ class PaginateFirestore extends StatefulWidget {
   final List<ChangeNotifier>? listeners;
   final EdgeInsets padding;
   final ScrollPhysics? physics;
+  final double? cacheExtent,
   final Query query;
   final bool reverse;
   final bool allowImplicitScrolling;
@@ -174,6 +176,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
       physics: widget.physics,
+	  cacheExtent: widget.cacheExtent,
       slivers: [
         if (widget.header != null) widget.header!,
         SliverPadding(
@@ -220,6 +223,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
       physics: widget.physics,
+	  cacheExtent: widget.cacheExtent,
       slivers: [
         if (widget.header != null) widget.header!,
         SliverPadding(
