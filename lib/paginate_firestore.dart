@@ -22,7 +22,7 @@ class PaginateFirestore extends StatefulWidget {
     required this.query,
     required this.itemBuilderType,
     this.gridDelegate =
-        const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+    const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
     this.startAfterDocument,
     this.itemsPerPage = 15,
     this.onError,
@@ -37,13 +37,14 @@ class PaginateFirestore extends StatefulWidget {
     this.scrollDirection = Axis.vertical,
     this.padding = const EdgeInsets.all(0),
     this.physics,
-	this.cacheExtent,
+    this.cacheExtent,
     this.listeners,
     this.scrollController,
     this.allowImplicitScrolling = false,
     this.pageController,
     this.onPageChanged,
     this.header,
+    this.headerBuilder,
     this.footer,
     this.isLive = false,
   }) : super(key: key);
@@ -78,6 +79,9 @@ class PaginateFirestore extends StatefulWidget {
 
   final Widget Function(int, BuildContext, DocumentSnapshot) itemBuilder;
 
+  final Widget Function(BuildContext, List<DocumentSnapshot> documentSnapshots)?
+  headerBuilder;
+
   final void Function(PaginationLoaded)? onReachedEnd;
 
   final void Function(PaginationLoaded)? onLoaded;
@@ -102,7 +106,10 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
               child: (widget.onError != null)
                   ? widget.onError!(state.error)
                   : ErrorDisplay(exception: state.error),
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
             ),
           );
         } else {
@@ -115,7 +122,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
           }
 
           if (loadedState.documentSnapshots.isEmpty) {
-			/*
+            /*
             return SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
               child: Container(
@@ -124,13 +131,13 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
               ),
             );
 			*/
-			return widget.emptyDisplay;
+            return widget.emptyDisplay;
           }
           return widget.itemBuilderType == PaginateBuilderType.listView
               ? _buildListView(loadedState)
               : widget.itemBuilderType == PaginateBuilderType.gridView
-                  ? _buildGridView(loadedState)
-                  : _buildPageView(loadedState);
+              ? _buildGridView(loadedState)
+              : _buildPageView(loadedState);
         }
       },
     );
@@ -168,7 +175,8 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       widget.itemsPerPage,
       widget.startAfterDocument,
       isLive: widget.isLive,
-    )..fetchPaginatedList();
+    )
+      ..fetchPaginatedList();
     super.initState();
   }
 
@@ -179,7 +187,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
       physics: widget.physics,
-	  cacheExtent: widget.cacheExtent,
+      cacheExtent: widget.cacheExtent,
       slivers: [
         if (widget.header != null) widget.header!,
         SliverPadding(
@@ -187,7 +195,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
           sliver: SliverGrid(
             gridDelegate: widget.gridDelegate,
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
+                  (context, index) {
                 if (index >= loadedState.documentSnapshots.length) {
                   _cubit!.fetchPaginatedList();
                   return widget.bottomLoader;
@@ -208,9 +216,10 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
     if (widget.listeners != null && widget.listeners!.isNotEmpty) {
       return MultiProvider(
         providers: widget.listeners!
-            .map((_listener) => ChangeNotifierProvider(
-                  create: (context) => _listener,
-                ))
+            .map((_listener) =>
+            ChangeNotifierProvider(
+              create: (context) => _listener,
+            ))
             .toList(),
         child: gridView,
       );
@@ -226,14 +235,30 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
       physics: widget.physics,
-	  cacheExtent: widget.cacheExtent,
+      cacheExtent: widget.cacheExtent,
       slivers: [
         if (widget.header != null) widget.header!,
+        if (widget.headerBuilder != null)
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [widget.headerBuilder!(context, loadedState.documentSnapshots)],
+            ),
+          ),
         SliverPadding(
           padding: widget.padding,
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
+                  (context, index) {
+                return;
+              },
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: widget.padding,
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (context, index) {
                 final itemIndex = index ~/ 2;
                 if (index.isEven) {
                   if (itemIndex >= loadedState.documentSnapshots.length) {
@@ -255,9 +280,9 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
               childCount: max(
                   0,
                   (loadedState.hasReachedEnd
-                              ? loadedState.documentSnapshots.length
-                              : loadedState.documentSnapshots.length + 1) *
-                          2 -
+                      ? loadedState.documentSnapshots.length
+                      : loadedState.documentSnapshots.length + 1) *
+                      2 -
                       1),
             ),
           ),
@@ -269,9 +294,10 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
     if (widget.listeners != null && widget.listeners!.isNotEmpty) {
       return MultiProvider(
         providers: widget.listeners!
-            .map((_listener) => ChangeNotifierProvider(
-                  create: (context) => _listener,
-                ))
+            .map((_listener) =>
+            ChangeNotifierProvider(
+              create: (context) => _listener,
+            ))
             .toList(),
         child: listView,
       );
@@ -291,7 +317,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
         physics: widget.physics,
         onPageChanged: widget.onPageChanged,
         childrenDelegate: SliverChildBuilderDelegate(
-          (context, index) {
+              (context, index) {
             if (index >= loadedState.documentSnapshots.length) {
               _cubit!.fetchPaginatedList();
               return widget.bottomLoader;
@@ -309,9 +335,10 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
     if (widget.listeners != null && widget.listeners!.isNotEmpty) {
       return MultiProvider(
         providers: widget.listeners!
-            .map((_listener) => ChangeNotifierProvider(
-                  create: (context) => _listener,
-                ))
+            .map((_listener) =>
+            ChangeNotifierProvider(
+              create: (context) => _listener,
+            ))
             .toList(),
         child: pageView,
       );
